@@ -20,3 +20,6 @@ class Bird:
         painter.setBrush(self.color)
         painter.setPen(Qt.PenStyle.NoPen)
         painter.drawEllipse(int(self.x), int(self.y), self.size, self.size)
+
+    def jump(self):
+        self.velocity = -10

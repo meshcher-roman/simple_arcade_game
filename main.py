@@ -1,7 +1,7 @@
 import sys
 
 from PyQt6.QtCore import Qt, QTimer
-from PyQt6.QtGui import QColor, QPainter
+from PyQt6.QtGui import QPainter
 from PyQt6.QtWidgets import QApplication, QMainWindow, QVBoxLayout, QWidget
 
 from bird import Bird
@@ -17,11 +17,18 @@ class GameArea(QWidget):
         super().__init__()
         self.setFixedSize(SCREEN_WIDTH, SCREEN_HEIGHT)
         self.setStyleSheet("background-color: #87CEEB;")
+
+        self.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
+
         self.timer = QTimer()
         self.timer.timeout.connect(self.update_game)
         self.timer.start(16)
         # Создаем птицу
         self.bird = Bird(50, 200)
+
+    def keyPressEvent(self, event):
+        if event.key() == Qt.Key.Key_Space:
+            self.bird.jump()
 
     def update_game(self):
         self.bird.move()
