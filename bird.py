@@ -1,4 +1,4 @@
-from PyQt6.QtCore import Qt
+from PyQt6.QtCore import QRectF, Qt
 from PyQt6.QtGui import QColor
 
 
@@ -16,6 +16,12 @@ class Bird:
         self.velocity += self.gravity
         self.y += self.velocity
 
+        if self.y < 0:
+            self.y = 0  # Не пускаем выше края
+            self.velocity = (
+                0  # Гасим инерцию подлета, чтобы она сразу могла начать падать
+            )
+
     def draw(self, painter):
         painter.setBrush(self.color)
         painter.setPen(Qt.PenStyle.NoPen)
@@ -23,3 +29,6 @@ class Bird:
 
     def jump(self):
         self.velocity = -10
+
+    def get_rect(self):
+        return QRectF(self.x, self.y, self.size * 0.8, self.size * 0.7)

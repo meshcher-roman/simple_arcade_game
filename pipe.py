@@ -1,6 +1,6 @@
 import random
 
-from PyQt6.QtCore import Qt
+from PyQt6.QtCore import QRectF, Qt
 from PyQt6.QtGui import QColor
 
 
@@ -35,3 +35,12 @@ class Pipe:
         bottom_height = self.screen_height - bottom_y
 
         painter.drawRect(int(self.x), bottom_y, self.width, bottom_height)
+
+    def get_rects(self):
+        top_rect = QRectF(self.x, 0, self.width, self.gap_y)
+
+        bottom_y = self.gap_y + self.gap_size
+        bottom_height = self.screen_height - bottom_y
+        bottom_rect = QRectF(self.x, bottom_y, self.width, bottom_height)
+
+        return top_rect, bottom_rect
