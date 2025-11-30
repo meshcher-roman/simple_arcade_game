@@ -22,13 +22,11 @@ class Bird:
                 0  # Гасим инерцию подлета, чтобы она сразу могла начать падать
             )
 
-    def draw(self, painter):
-        painter.setBrush(self.color)
-        painter.setPen(Qt.PenStyle.NoPen)
-        painter.drawEllipse(int(self.x), int(self.y), self.size, self.size)
+    def draw(self, painter, bird_pixmap):
+        painter.drawPixmap(int(self.x), int(self.y), self.size, self.size, bird_pixmap)
 
     def jump(self):
-        self.velocity = -10
+        self.velocity = -7
 
     def get_rect(self):
         return QRectF(self.x, self.y, self.size * 0.8, self.size * 0.7)

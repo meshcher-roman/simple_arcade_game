@@ -74,9 +74,11 @@ class GameArea(QWidget):
             0, 0, self.width(), self.height(), self.current_theme.background_img
         )
 
+        pipe_texture = self.current_theme.pipe_img
         for pipe in self.pipes:
-            pipe.draw(painter)
-        self.bird.draw(painter)
+            pipe.draw(painter, pipe_texture)
+        bird_texture = self.current_theme.bird_img
+        self.bird.draw(painter, bird_texture)
         painter.end()
 
     def check_collisions(self):
