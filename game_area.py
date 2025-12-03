@@ -1,3 +1,5 @@
+import json
+
 from PyQt6.QtCore import Qt, QTimer
 from PyQt6.QtGui import QColor, QFont, QPainter
 from PyQt6.QtWidgets import QPushButton, QWidget
@@ -48,24 +50,31 @@ class GameArea(QWidget):
         self.restart_btn.resize(200, 50)
         self.restart_btn.move(100, 350)
 
-        self.restart_btn.setStyleSheet("""
-            QPushButton {
-                background-color: #E0C068;
-                border: 2px solid #555;
-                border-radius: 10px;
-                font-size: 20px;
-                font-weight: bold;
-                color: #333;
-            }
-            QPushButton:hover {
-                background-color: #F0D078;
-            }
-        """)
+        button_style = self.load_style_from_json("style.json")
+        self.restart_btn.setStyleSheet(button_style)
         self.restart_btn.clicked.connect(self.restart_game)
         self.restart_btn.show()
         self.timer.stop()
         self.spawn_timer.stop()
         self.game_active = False
+
+    def load_style_from_json(self, file_path):
+        try:
+            with open(file_path, "r", encoding="utf-8") as f:
+                data = json.load(f)
+
+            # Превращаем JSON словарь в строку CSS
+            stylesheet = ""
+            for selector, properties in data.items():
+                stylesheet += f"{selector} {{\n"
+                for key, value in properties.items():
+                    stylesheet += f"    {key}: {value};\n"
+                stylesheet += "}\n"
+
+            return stylesheet
+        except Exception as e:
+            print(f"Ошибка загрузки стилей: {e}")
+            return ""
 
     def restart_game(self):
         self.game_active = True
