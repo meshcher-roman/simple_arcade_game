@@ -1,6 +1,6 @@
 from PyQt6.QtCore import Qt, QTimer
-from PyQt6.QtGui import QPainter
-from PyQt6.QtWidgets import QWidget
+from PyQt6.QtGui import QColor, QFont, QPainter
+from PyQt6.QtWidgets import QPushButton, QWidget
 
 from bird import Bird
 from pipe import Pipe
@@ -23,6 +23,9 @@ class GameArea(QWidget):
             bg_path="assets/images/background.png",
             bird_path="assets/images/bird.png",
             pipe_path="assets/images/pipe.png",
+            # bg_path="assets/images/background_new_year.jpg",
+            # bird_path="assets/images/bird_new_year.png",
+            # pipe_path="assets/images/pipe_new_year.png",
             text_color_hex="FFFFFF",
         )
 
@@ -33,11 +36,47 @@ class GameArea(QWidget):
         self.bird = Bird(50, 200)
 
         self.game_active = True
+        self.is_game_over = False
 
         # Логика добавления труб
         self.pipes = []
         self.spawn_timer = QTimer()
         self.spawn_timer.timeout.connect(self.spawn_pipe)
+        self.spawn_timer.start(1500)
+
+        self.restart_btn = QPushButton("Start Game", self)
+        self.restart_btn.resize(200, 50)
+        self.restart_btn.move(100, 350)
+
+        self.restart_btn.setStyleSheet("""
+            QPushButton {
+                background-color: #E0C068;
+                border: 2px solid #555;
+                border-radius: 10px;
+                font-size: 20px;
+                font-weight: bold;
+                color: #333;
+            }
+            QPushButton:hover {
+                background-color: #F0D078;
+            }
+        """)
+        self.restart_btn.clicked.connect(self.restart_game)
+        self.restart_btn.show()
+        self.timer.stop()
+        self.spawn_timer.stop()
+        self.game_active = False
+
+    def restart_game(self):
+        self.game_active = True
+        self.is_game_over = False
+        self.pipes.clear()
+        self.bird.y = 200
+        self.bird.velocity = 0
+
+        self.restart_btn.hide()
+        self.setFocus()
+        self.timer.start(16)
         self.spawn_timer.start(1500)
 
     def spawn_pipe(self):
@@ -79,6 +118,20 @@ class GameArea(QWidget):
             pipe.draw(painter, pipe_texture)
         bird_texture = self.current_theme.bird_img
         self.bird.draw(painter, bird_texture)
+
+        if self.is_game_over and not self.timer.isActive():
+            # Настраиваем шрифт
+            font = QFont("Arial", 40, QFont.Weight.Bold)
+            painter.setFont(font)
+            painter.setPen(QColor("black"))
+
+            # drawText(x, y, text)
+            painter.drawText(40, 200, "GAME OVER")
+
+            # Обводка текста (черная), чтобы читалось лучше (лайфхак)
+            painter.setPen(QColor("red"))
+            painter.drawText(38, 198, "GAME OVER")
+
         painter.end()
 
     def check_collisions(self):
@@ -88,7 +141,11 @@ class GameArea(QWidget):
         if self.bird.y >= floor_limit:
             self.bird.y = floor_limit
             self.timer.stop()
-            print("Game Over (Floor)")
+            self.spawn_timer.stop()
+            self.game_active = False
+            self.is_game_over = True
+            self.restart_btn.setText("Restart")
+            self.restart_btn.show()
             return False
 
         if self.game_active:

@@ -1,13 +1,9 @@
 import sys
 
-from PyQt6.QtCore import Qt, QTimer
-from PyQt6.QtGui import QPainter
+from PyQt6.QtCore import Qt
 from PyQt6.QtWidgets import QApplication, QMainWindow, QVBoxLayout, QWidget
 
-from bird import Bird
 from game_area import GameArea
-from pipe import Pipe
-from theme import Theme
 
 
 # ГЛАВНОЕ ОКНО
