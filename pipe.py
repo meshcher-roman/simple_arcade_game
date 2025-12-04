@@ -13,6 +13,7 @@ class Pipe:
         self.speed = 3
         self.gap_size = 150
         self.color = QColor("228B22")
+        self.passed = False
 
         # Логика вычисления высоты пролета
         min_y = 50

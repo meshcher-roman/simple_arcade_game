@@ -1,4 +1,5 @@
 import json
+import sys
 
 from PyQt6.QtCore import Qt, QTimer
 from PyQt6.QtGui import QColor, QFont, QPainter
@@ -15,21 +16,19 @@ SCREEN_HEIGHT = 600
 class GameArea(QWidget):
     def __init__(self):
         super().__init__()
+        self.score = 0
+
         self.setFixedSize(SCREEN_WIDTH, SCREEN_HEIGHT)
-        # self.setStyleSheet("background-color: #87CEEB;")
 
         self.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
-
-        self.current_theme = Theme(
-            name="Default",
-            bg_path="assets/images/background.png",
-            bird_path="assets/images/bird.png",
-            pipe_path="assets/images/pipe.png",
-            # bg_path="assets/images/background_new_year.jpg",
-            # bird_path="assets/images/bird_new_year.png",
-            # pipe_path="assets/images/pipe_new_year.png",
-            text_color_hex="FFFFFF",
-        )
+        self.themes = self.load_themes_from_json("themes.json")
+        self.current_theme_index = 2
+        if self.themes:
+            self.current_theme = self.themes[self.current_theme_index]
+        else:
+            # На всякий случай, если JSON пустой или битый
+            print("Критическая ошибка: Темы не загружены!")
+            sys.exit()
 
         self.timer = QTimer()
         self.timer.timeout.connect(self.update_game)
@@ -87,6 +86,7 @@ class GameArea(QWidget):
         self.setFocus()
         self.timer.start(16)
         self.spawn_timer.start(1500)
+        self.score = 0
 
     def spawn_pipe(self):
         new_pipe = Pipe(SCREEN_WIDTH, SCREEN_HEIGHT)
@@ -108,6 +108,10 @@ class GameArea(QWidget):
 
             for pipe in self.pipes:
                 pipe.move()
+                if not pipe.passed and pipe.x + pipe.width < self.bird.x:
+                    self.score += 1
+                    pipe.passed = True
+                    print(f"Score: {self.score}")  # Для проверки в консоли
             self.pipes = [p for p in self.pipes if p.x + p.width > 0]
 
         else:
@@ -128,16 +132,28 @@ class GameArea(QWidget):
         bird_texture = self.current_theme.bird_img
         self.bird.draw(painter, bird_texture)
 
+        painter.setFont(QFont("Arial", 30, QFont.Weight.Bold))
+
+        score_text = str(self.score)
+
+        painter.setPen(QColor("black"))
+        painter.drawText(
+            0, 50, self.width(), 50, Qt.AlignmentFlag.AlignCenter, score_text
+        )
+
+        painter.setPen(QColor("white"))
+        painter.drawText(
+            -2, 48, self.width(), 50, Qt.AlignmentFlag.AlignCenter, score_text
+        )
+
         if self.is_game_over and not self.timer.isActive():
             # Настраиваем шрифт
             font = QFont("Arial", 40, QFont.Weight.Bold)
             painter.setFont(font)
             painter.setPen(QColor("black"))
 
-            # drawText(x, y, text)
             painter.drawText(40, 200, "GAME OVER")
 
-            # Обводка текста (черная), чтобы читалось лучше (лайфхак)
             painter.setPen(QColor("red"))
             painter.drawText(38, 198, "GAME OVER")
 
@@ -165,3 +181,34 @@ class GameArea(QWidget):
                     return True
 
         return False
+
+    def load_themes_from_json(self, file_path):
+        themes_list = []
+        try:
+            with open(file_path, "r", encoding="utf-8") as f:
+                data = json.load(f)
+
+            for item in data:
+                # Создаем объект Theme, используя данные из словаря
+                new_theme = Theme(
+                    name=item["name"],
+                    bg_path=item["bg_path"],
+                    bird_path=item["bird_path"],
+                    pipe_path=item["pipe_path"],
+                    text_color_hex=item["text_color_hex"],
+                )
+                themes_list.append(new_theme)
+
+        except Exception as e:
+            print(f"Ошибка загрузки тем: {e}")
+
+            default_theme = Theme(
+                "Backup",
+                "assets/images/background.png",
+                "assets/images/bird.png",
+                "assets/images/pipe.png",
+                "#FFFFFF",
+            )
+            themes_list.append(default_theme)
+
+        return themes_list
