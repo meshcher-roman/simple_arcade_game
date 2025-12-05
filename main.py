@@ -7,6 +7,7 @@ from PyQt6.QtWidgets import (
     QHBoxLayout,
     QMainWindow,
     QPushButton,
+    QSizePolicy,
     QVBoxLayout,
     QWidget,
 )
@@ -20,21 +21,26 @@ class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("Flappy Bird")
-        self.resize(1000, 800)
+        self.resize(1000, 600)
 
         central_widget = QWidget()
         self.setCentralWidget(central_widget)
 
         main_layout = QHBoxLayout(central_widget)
+        main_layout.setContentsMargins(0, 0, 0, 0)
+        main_layout.setSpacing(0)
         main_layout.addStretch(1)
 
         self.game_area = GameArea()
         main_layout.addWidget(self.game_area)
 
         right_panel_layout = QVBoxLayout()
-        right_panel_layout.setContentsMargins(20, 0, 20, 0)
+        right_panel_layout.setContentsMargins(20, 10, 20, 10)
         self.skin_btn = QPushButton("Change Skin")
-        self.skin_btn.setFixedSize(150, 50)
+        self.skin_btn.setFixedHeight(60)
+        self.skin_btn.setSizePolicy(
+            QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed
+        )
 
         self.skin_btn.setStyleSheet(load_style_from_json("style.json"))
         self.skin_btn.clicked.connect(self.game_area.switch_theme)
