@@ -1,0 +1,30 @@
+[
+  {
+    "name": "Default",
+    "bg_path": "assets/images/background.png",
+    "bird_path": "assets/images/bird.png",
+    "pipe_path": "assets/images/pipe.png",
+    "text_color_hex": "#FFFFFF"
+  },
+  {
+    "name": "New Year",
+    "bg_path": "assets/images/background_new_year.jpg",
+    "bird_path": "assets/images/bird_new_year.png",
+    "pipe_path": "assets/images/pipe_new_year.png",
+    "text_color_hex": "#FFFF00"
+  },
+  {
+    "name": "Dragon",
+    "bg_path": "assets/images/background_dragon.jpg",
+    "bird_path": "assets/images/bird_dragon.png",
+    "pipe_path": "assets/images/pipe_gragon.png",
+    "text_color_hex": "#FFFF00"
+  },
+  {
+    "name": "Angry Birds",
+    "bg_path": "assets/images/background_angry_birds.jpg",
+    "bird_path": "assets/images/bird_angry_birds.png",
+    "pipe_path": "assets/images/pipe_angry_birds.png",
+    "text_color_hex": "#FFFF00"
+  }
+]

@@ -6,6 +6,7 @@ from PyQt6.QtGui import QColor, QFont, QPainter
 from PyQt6.QtWidgets import QPushButton, QWidget
 
 from bird import Bird
+from json_to_str_reader import load_style_from_json
 from pipe import Pipe
 from theme import Theme
 
@@ -22,7 +23,7 @@ class GameArea(QWidget):
 
         self.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
         self.themes = self.load_themes_from_json("themes.json")
-        self.current_theme_index = 3
+        self.current_theme_index = 2
         if self.themes:
             self.current_theme = self.themes[self.current_theme_index]
         else:
@@ -49,31 +50,13 @@ class GameArea(QWidget):
         self.restart_btn.resize(200, 50)
         self.restart_btn.move(100, 350)
 
-        button_style = self.load_style_from_json("style.json")
+        button_style = load_style_from_json("style.json")
         self.restart_btn.setStyleSheet(button_style)
         self.restart_btn.clicked.connect(self.restart_game)
         self.restart_btn.show()
         self.timer.stop()
         self.spawn_timer.stop()
         self.game_active = False
-
-    def load_style_from_json(self, file_path):
-        try:
-            with open(file_path, "r", encoding="utf-8") as f:
-                data = json.load(f)
-
-            # Превращаем JSON словарь в строку CSS
-            stylesheet = ""
-            for selector, properties in data.items():
-                stylesheet += f"{selector} {{\n"
-                for key, value in properties.items():
-                    stylesheet += f"    {key}: {value};\n"
-                stylesheet += "}\n"
-
-            return stylesheet
-        except Exception as e:
-            print(f"Ошибка загрузки стилей: {e}")
-            return ""
 
     def restart_game(self):
         self.game_active = True
@@ -212,3 +195,11 @@ class GameArea(QWidget):
             themes_list.append(default_theme)
 
         return themes_list
+
+    def switch_theme(self):
+        self.current_theme_index = (self.current_theme_index + 1) % len(self.themes)
+        self.current_theme = self.themes[self.current_theme_index]
+        self.update()
+
+        if self.window():
+            self.window().update()
