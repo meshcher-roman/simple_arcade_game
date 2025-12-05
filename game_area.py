@@ -1,4 +1,5 @@
 import json
+import math
 import sys
 
 from PyQt6.QtCore import QSettings, Qt, QTimer, pyqtSignal
@@ -19,6 +20,8 @@ class GameArea(QWidget):
 
     def __init__(self):
         super().__init__()
+        self.hover_frame = 0
+        self.ready_to_start = False
         self.settings = QSettings("MyApp", "FlappyBird")
         self.high_score = int(self.settings.value("high_score", 0))
         self.score = 0
@@ -61,30 +64,47 @@ class GameArea(QWidget):
         self.timer.stop()
         self.spawn_timer.stop()
         self.game_active = False
+        self.reset_game()
 
-    def restart_game(self):
-        self.game_active = True
+    def reset_game(self):
+        self.game_active = False
+        self.ready_to_start = True
         self.is_game_over = False
+
         self.pipes.clear()
         self.bird.y = 200
         self.bird.velocity = 0
-
+        self.score = 0
+        self.score_updated.emit(self.score, self.high_score)
         self.restart_btn.hide()
         self.setFocus()
         self.timer.start(16)
-        self.spawn_timer.start(1500)
-        self.score = 0
-        self.score_updated.emit(self.score, self.high_score)
+        self.spawn_timer.stop()
+
+    def restart_game(self):
+        self.reset_game()
 
     def spawn_pipe(self):
         new_pipe = Pipe(SCREEN_WIDTH, SCREEN_HEIGHT)
         self.pipes.append(new_pipe)
 
     def keyPressEvent(self, event):
-        if self.game_active and event.key() == Qt.Key.Key_Space:
-            self.bird.jump()
+        if event.key() == Qt.Key.Key_Space:
+            if self.ready_to_start:
+                self.ready_to_start = False
+                self.game_active = True
+                self.spawn_timer.start(1500)
+                self.bird.jump()
+
+            elif self.game_active:
+                self.bird.jump()
 
     def update_game(self):
+        if self.ready_to_start:
+            self.hover_frame += 0.1
+            self.bird.y = 200 + math.sin(self.hover_frame) * 10
+            self.update()
+            return
         self.bird.move()
 
         if self.game_active:
@@ -123,7 +143,23 @@ class GameArea(QWidget):
             pipe.draw(painter, pipe_texture)
         bird_texture = self.current_theme.bird_img
         self.bird.draw(painter, bird_texture)
+        if self.ready_to_start:
+            font = QFont("Arial", 20, QFont.Weight.Bold)
+            painter.setFont(font)
 
+            text = "Press SPACE to Start"
+
+            # Тень
+            painter.setPen(QColor("black"))
+            painter.drawText(
+                2, 302, self.width(), 50, Qt.AlignmentFlag.AlignCenter, text
+            )
+
+            # Текст
+            painter.setPen(QColor("white"))
+            painter.drawText(
+                0, 300, self.width(), 50, Qt.AlignmentFlag.AlignCenter, text
+            )
         if self.is_game_over and not self.timer.isActive():
             # Настраиваем шрифт
             font = QFont("Arial", 40, QFont.Weight.Bold)
