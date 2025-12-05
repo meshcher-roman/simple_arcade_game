@@ -23,7 +23,26 @@ class Bird:
             )
 
     def draw(self, painter, bird_pixmap):
-        painter.drawPixmap(int(self.x), int(self.y), self.size, self.size, bird_pixmap)
+        painter.save()
+        center_x = self.x + self.size / 2
+        center_y = self.y + self.size / 2
+
+        rotation_angle = self.velocity * 3
+
+        if rotation_angle < -30:
+            rotation_angle = -30
+        if rotation_angle > 30:
+            rotation_angle = 30
+
+        painter.translate(center_x, center_y)
+
+        painter.rotate(rotation_angle)
+
+        offset = -self.size / 2
+
+        painter.drawPixmap(int(offset), int(offset), self.size, self.size, bird_pixmap)
+
+        painter.restore()
 
     def jump(self):
         self.velocity = -7
