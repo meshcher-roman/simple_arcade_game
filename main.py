@@ -15,7 +15,7 @@ from PyQt6.QtWidgets import (
 )
 
 from game_area import GameArea
-from json_to_str_reader import load_style_from_json
+from json_reader import load_style_from_json
 
 
 # ГЛАВНОЕ ОКНО

@@ -6,7 +6,7 @@ from PyQt6.QtGui import QColor, QFont, QPainter
 from PyQt6.QtWidgets import QPushButton, QWidget
 
 from bird import Bird
-from json_to_str_reader import load_style_from_json
+from json_reader import load_style_from_json, load_themes_from_json
 from pipe import Pipe
 from theme import Theme
 
@@ -26,7 +26,7 @@ class GameArea(QWidget):
         self.setFixedSize(SCREEN_WIDTH, SCREEN_HEIGHT)
 
         self.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
-        self.themes = self.load_themes_from_json("themes.json")
+        self.themes = load_themes_from_json("themes.json")
         self.current_theme_index = 2
         if self.themes:
             self.current_theme = self.themes[self.current_theme_index]
@@ -160,36 +160,36 @@ class GameArea(QWidget):
 
         return False
 
-    def load_themes_from_json(self, file_path):
-        themes_list = []
-        try:
-            with open(file_path, "r", encoding="utf-8") as f:
-                data = json.load(f)
+    # def load_themes_from_json(self, file_path):
+    #     themes_list = []
+    #     try:
+    #         with open(file_path, "r", encoding="utf-8") as f:
+    #             data = json.load(f)
 
-            for item in data:
-                # Создаем объект Theme, используя данные из словаря
-                new_theme = Theme(
-                    name=item["name"],
-                    bg_path=item["bg_path"],
-                    bird_path=item["bird_path"],
-                    pipe_path=item["pipe_path"],
-                    text_color_hex=item["text_color_hex"],
-                )
-                themes_list.append(new_theme)
+    #         for item in data:
+    #             # Создаем объект Theme, используя данные из словаря
+    #             new_theme = Theme(
+    #                 name=item["name"],
+    #                 bg_path=item["bg_path"],
+    #                 bird_path=item["bird_path"],
+    #                 pipe_path=item["pipe_path"],
+    #                 text_color_hex=item["text_color_hex"],
+    #             )
+    #             themes_list.append(new_theme)
 
-        except Exception as e:
-            print(f"Ошибка загрузки тем: {e}")
+    #     except Exception as e:
+    #         print(f"Ошибка загрузки тем: {e}")
 
-            default_theme = Theme(
-                "Backup",
-                "assets/images/background.png",
-                "assets/images/bird.png",
-                "assets/images/pipe.png",
-                "#FFFFFF",
-            )
-            themes_list.append(default_theme)
+    #         default_theme = Theme(
+    #             "Backup",
+    #             "assets/images/background.png",
+    #             "assets/images/bird.png",
+    #             "assets/images/pipe.png",
+    #             "#FFFFFF",
+    #         )
+    #         themes_list.append(default_theme)
 
-        return themes_list
+    #     return themes_list
 
     def switch_theme(self):
         self.current_theme_index = (self.current_theme_index + 1) % len(self.themes)
