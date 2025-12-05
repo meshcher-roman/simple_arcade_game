@@ -22,7 +22,7 @@ class GameArea(QWidget):
 
         self.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
         self.themes = self.load_themes_from_json("themes.json")
-        self.current_theme_index = 2
+        self.current_theme_index = 3
         if self.themes:
             self.current_theme = self.themes[self.current_theme_index]
         else:

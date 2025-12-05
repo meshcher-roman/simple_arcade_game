@@ -1,3 +1,4 @@
+from PyQt6.QtCore import Qt
 from PyQt6.QtGui import QColor, QPixmap
 
 
@@ -10,3 +11,13 @@ class Theme:
         self.pipe_img = QPixmap(pipe_path)
 
         self.text_color = QColor(text_color_hex)
+
+        small_w = self.background_img.width() // 10
+        small_h = self.background_img.height() // 10
+
+        self.blurred_bg = self.background_img.scaled(
+            small_w,
+            small_h,
+            Qt.AspectRatioMode.IgnoreAspectRatio,
+            Qt.TransformationMode.SmoothTransformation,
+        )
