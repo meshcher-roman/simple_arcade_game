@@ -1,7 +1,7 @@
 import json
 import sys
 
-from PyQt6.QtCore import Qt, QTimer
+from PyQt6.QtCore import QSettings, Qt, QTimer, pyqtSignal
 from PyQt6.QtGui import QColor, QFont, QPainter
 from PyQt6.QtWidgets import QPushButton, QWidget
 
@@ -15,8 +15,12 @@ SCREEN_HEIGHT = 600
 
 
 class GameArea(QWidget):
+    score_updated = pyqtSignal(int, int)
+
     def __init__(self):
         super().__init__()
+        self.settings = QSettings("MyApp", "FlappyBird")
+        self.high_score = int(self.settings.value("high_score", 0))
         self.score = 0
 
         self.setFixedSize(SCREEN_WIDTH, SCREEN_HEIGHT)
@@ -70,6 +74,7 @@ class GameArea(QWidget):
         self.timer.start(16)
         self.spawn_timer.start(1500)
         self.score = 0
+        self.score_updated.emit(self.score, self.high_score)
 
     def spawn_pipe(self):
         new_pipe = Pipe(SCREEN_WIDTH, SCREEN_HEIGHT)
@@ -94,7 +99,11 @@ class GameArea(QWidget):
                 if not pipe.passed and pipe.x + pipe.width < self.bird.x:
                     self.score += 1
                     pipe.passed = True
-                    print(f"Score: {self.score}")  # Для проверки в консоли
+
+                    if self.score > self.high_score:
+                        self.high_score = self.score
+                        self.settings.setValue("high_score", self.high_score)
+                    self.score_updated.emit(self.score, self.high_score)
             self.pipes = [p for p in self.pipes if p.x + p.width > 0]
 
         else:
@@ -114,20 +123,6 @@ class GameArea(QWidget):
             pipe.draw(painter, pipe_texture)
         bird_texture = self.current_theme.bird_img
         self.bird.draw(painter, bird_texture)
-
-        painter.setFont(QFont("Arial", 30, QFont.Weight.Bold))
-
-        score_text = str(self.score)
-
-        painter.setPen(QColor("black"))
-        painter.drawText(
-            0, 50, self.width(), 50, Qt.AlignmentFlag.AlignCenter, score_text
-        )
-
-        painter.setPen(QColor("white"))
-        painter.drawText(
-            -2, 48, self.width(), 50, Qt.AlignmentFlag.AlignCenter, score_text
-        )
 
         if self.is_game_over and not self.timer.isActive():
             # Настраиваем шрифт
