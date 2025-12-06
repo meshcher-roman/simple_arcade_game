@@ -67,6 +67,17 @@ def load_settings_from_json(file_path):
                 "app_min_width": 1000,
                 "app_min_height": 600,
             },
+            "audio": {"music_volume": 0.5, "sfx_volume": 1.0},
+            "gameplay": {"fps": 60, "spawn_interval": 1500},
+            "bird": {
+                "start_x": 50,
+                "start_y": 200,
+                "size": 30,
+                "gravity": 0.5,
+                "jump_velocity": -7,
+                "rotation_multiplier": 3,
+            },
+            "pipe": {"width": 60, "speed": 3, "gap_size": 150},
             "gameplay": {"fps": 60, "spawn_interval": 1500},
             "bird": {
                 "start_x": 50,

@@ -3,7 +3,11 @@
     "screen_width": 400,
     "screen_height": 600,
     "app_min_width": 1000,
-    "app_min_height": 600
+    "app_min_height": 700
+  },
+  "audio": {
+    "music_volume": 0.3,
+    "sfx_volume": 1.0
   },
   "gameplay": {
     "fps": 60,

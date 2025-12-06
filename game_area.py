@@ -12,6 +12,7 @@ from json_reader import (
     load_themes_from_json,
 )
 from pipe import Pipe
+from sound_manager import SoundManager
 
 
 class GameArea(QWidget):
@@ -22,8 +23,7 @@ class GameArea(QWidget):
 
         # 1. ЗАГРУЖАЕМ НАСТРОЙКИ
         self.config = load_settings_from_json("settings.json")
-
-        # Достаем параметры окна для удобства
+        self.sounds = SoundManager(self.config)  # Достаем параметры окна для удобства
         self.SCREEN_WIDTH = self.config["window"]["screen_width"]
         self.SCREEN_HEIGHT = self.config["window"]["screen_height"]
 
@@ -109,6 +109,7 @@ class GameArea(QWidget):
         self.setFocus()
         self.timer.start(1000 // self.config["gameplay"]["fps"])
         self.spawn_timer.stop()
+        self.sounds.stop_music()
 
     def restart_game(self):
         self.reset_game()
@@ -124,12 +125,13 @@ class GameArea(QWidget):
                 self.ready_to_start = False
                 self.game_active = True
                 self.spawn_timer.start(self.config["gameplay"]["spawn_interval"])
+                self.sounds.start_music()
                 self.bird.jump()
-
+                self.sounds.play_jump()
             elif self.game_active:
                 self.bird.jump()
+                self.sounds.play_jump()
 
-    # ... update_game почти без изменений, только замени 200 на self.config["bird"]["start_y"] ...
     def update_game(self):
         if self.ready_to_start:
             self.hover_frame += 0.1
@@ -153,6 +155,7 @@ class GameArea(QWidget):
                 if not pipe.passed and pipe.x + pipe.width < self.bird.x:
                     self.score += 1
                     pipe.passed = True
+                    self.sounds.play_score()
 
                     if self.score > self.high_score:
                         self.high_score = self.score
@@ -209,25 +212,47 @@ class GameArea(QWidget):
 
     def check_collisions(self):
         bird_rect = self.bird.get_rect()
-        # Используем динамическую высоту экрана
+
         floor_limit = self.SCREEN_HEIGHT - self.bird.size
 
         if self.bird.y >= floor_limit:
             self.bird.y = floor_limit
+
+            if not self.is_game_over:
+                self.handle_game_over()
+
             self.timer.stop()
-            self.spawn_timer.stop()
-            self.game_active = False
-            self.is_game_over = True
-            self.restart_btn.setText("Restart")
-            self.restart_btn.show()
+            return False
+
+        if self.is_game_over:
             return False
 
         if self.game_active:
             for pipe in self.pipes:
                 top_rect, bottom_rect = pipe.get_rects()
+
                 if bird_rect.intersects(top_rect) or bird_rect.intersects(bottom_rect):
+                    self.handle_game_over()
                     return True
+
         return False
+
+    def handle_game_over(self):
+        if self.is_game_over:
+            return
+
+        self.is_game_over = True
+        self.game_active = False
+
+        self.spawn_timer.stop()
+
+        # Звуки и музыка
+        self.sounds.play_hit()
+        self.sounds.stop_music()
+
+        self.restart_btn.setText("Restart")
+        self.restart_btn.show()
+        # self.skin_btn.show()
 
     def switch_theme(self):
         self.current_theme_index = (self.current_theme_index + 1) % len(self.themes)
