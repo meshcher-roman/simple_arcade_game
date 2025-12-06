@@ -1,6 +1,6 @@
 import random
 
-from PyQt6.QtCore import QRectF, Qt
+from PyQt6.QtCore import QRectF
 from PyQt6.QtGui import QColor, QTransform
 
 

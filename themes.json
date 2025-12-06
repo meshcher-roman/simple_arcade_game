@@ -26,5 +26,12 @@
     "bird_path": "assets/images/bird_angry_birds.png",
     "pipe_path": "assets/images/pipe_angry_birds.png",
     "text_color_hex": "#FFFF00"
+  },
+  {
+    "name": "Angry Birds",
+    "bg_path": "assets/images/background_halloween.jpg",
+    "bird_path": "assets/images/bird_halloween.png",
+    "pipe_path": "assets/images/pipe_halloween.png",
+    "text_color_hex": "#FFFF00"
   }
 ]

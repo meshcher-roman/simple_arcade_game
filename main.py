@@ -9,6 +9,7 @@ from PyQt6.QtWidgets import (
     QLabel,
     QMainWindow,
     QPushButton,
+    QScrollArea,
     QSizePolicy,
     QVBoxLayout,
     QWidget,
@@ -16,6 +17,7 @@ from PyQt6.QtWidgets import (
 
 from game_area import GameArea
 from json_reader import load_style_from_json
+from theme_card import ThemeCard
 
 
 # ГЛАВНОЕ ОКНО
@@ -23,7 +25,8 @@ class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("Flappy Bird")
-        self.resize(1000, 600)
+
+        self.setMinimumSize(1000, 600)
 
         central_widget = QWidget()
         self.setCentralWidget(central_widget)
@@ -32,74 +35,107 @@ class MainWindow(QMainWindow):
         main_layout.setContentsMargins(0, 0, 0, 0)
         main_layout.setSpacing(0)
 
-        left_panel_layout = QVBoxLayout()
-        left_panel_layout.setContentsMargins(20, 20, 20, 10)
-        left_panel_layout.setSpacing(10)
+        # --- СОЗДАНИЕ ИГРЫ ---
+        self.game_area = GameArea()
+        self.game_area.score_updated.connect(self.update_labels)
+
+        # --- ЛЕВАЯ ПАНЕЛЬ ---
+        left_panel_widget = QWidget()
+        left_panel_widget.setFixedWidth(250)  # Чуть шире, чтобы текст влезал
+        left_panel_widget.setStyleSheet("background-color: rgba(0, 0, 0, 150);")
+
+        left_panel_layout = QVBoxLayout(left_panel_widget)
+        left_panel_layout.setContentsMargins(20, 50, 20, 20)
+        left_panel_layout.setSpacing(15)
 
         self.label_score_title = QLabel("SCORE")
         self.label_score_title.setStyleSheet(
-            "color: white; font-size: 20px; font-weight: bold;"
+            "color: white; font-size: 24px; font-weight: bold; background: transparent;"
         )
         self.label_score_title.setAlignment(Qt.AlignmentFlag.AlignCenter)
         left_panel_layout.addWidget(self.label_score_title)
 
         self.label_score_val = QLabel("0")
         self.label_score_val.setStyleSheet(
-            "color: #E0C068; font-size: 60px; font-weight: bold;"
+            "color: #E0C068; font-size: 60px; font-weight: bold; background: transparent;"
         )
         self.label_score_val.setAlignment(Qt.AlignmentFlag.AlignCenter)
         left_panel_layout.addWidget(self.label_score_val)
 
-        # -- Разделительная линия (для красоты) --
         line = QFrame()
         line.setFrameShape(QFrame.Shape.HLine)
         line.setStyleSheet("color: white;")
         left_panel_layout.addWidget(line)
 
-        # -- Надпись "BEST" --
         self.label_best_title = QLabel("BEST")
         self.label_best_title.setStyleSheet(
-            "color: white; font-size: 20px; font-weight: bold;"
+            "color: white; font-size: 24px; font-weight: bold; background: transparent;"
         )
         self.label_best_title.setAlignment(Qt.AlignmentFlag.AlignCenter)
         left_panel_layout.addWidget(self.label_best_title)
 
-        # -- Цифра Рекорда --
-        # Берем начальное значение сразу из game_area
-        self.game_area = (
-            GameArea()
-        )  # Создаем игру чуть ниже, но тут мы пока не можем взять значение...
-        self.label_best_val = QLabel("0")
+        self.label_best_val = QLabel(str(self.game_area.high_score))
         self.label_best_val.setStyleSheet(
-            "color: #E0C068; font-size: 40px; font-weight: bold;"
+            "color: #E0C068; font-size: 40px; font-weight: bold; background: transparent;"
         )
         self.label_best_val.setAlignment(Qt.AlignmentFlag.AlignCenter)
         left_panel_layout.addWidget(self.label_best_val)
 
         left_panel_layout.addStretch(1)
 
-        main_layout.addLayout(left_panel_layout, 1)
+        # --- ПРАВАЯ ПАНЕЛЬ ---
+        right_panel_widget = QWidget()
+        right_panel_widget.setFixedWidth(250)
+        right_panel_widget.setStyleSheet("background-color: rgba(0, 0, 0, 150);")
 
-        self.game_area = GameArea()
-        main_layout.addWidget(self.game_area)
-        self.label_best_val.setText(str(self.game_area.high_score))
+        self.right_layout = QVBoxLayout(right_panel_widget)
+        self.right_layout.setContentsMargins(20, 20, 20, 20)
 
-        right_panel_layout = QVBoxLayout()
-        right_panel_layout.setContentsMargins(20, 20, 20, 10)
-        self.skin_btn = QPushButton("Change Skin")
-        self.skin_btn.setFixedHeight(60)
-        self.skin_btn.setSizePolicy(
-            QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed
+        title_lbl = QLabel("THEMES")
+        title_lbl.setStyleSheet(
+            "color: white; font-weight: bold; font-size: 20px; background: transparent;"
         )
+        title_lbl.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.right_layout.addWidget(title_lbl)
 
-        self.skin_btn.setStyleSheet(load_style_from_json("style.json"))
-        self.skin_btn.clicked.connect(self.game_area.switch_theme)
+        scroll = QScrollArea()
+        scroll.setWidgetResizable(True)
+        scroll.setStyleSheet("background: transparent; border: none;")
 
-        right_panel_layout.addWidget(self.skin_btn)
-        right_panel_layout.addStretch(1)
-        main_layout.addLayout(right_panel_layout, 1)
+        scroll_content = QWidget()
+        scroll_content.setStyleSheet("background: transparent;")
+        self.cards_layout = QVBoxLayout(scroll_content)
+        self.cards_layout.setSpacing(20)
 
-        self.game_area.score_updated.connect(self.update_labels)
+        self.theme_cards = []
+        for i, theme in enumerate(self.game_area.themes):
+            is_active = i == self.game_area.current_theme_index
+            card = ThemeCard(theme, i, is_active)
+            card.clicked.connect(self.on_theme_selected)
+            self.cards_layout.addWidget(card)
+            self.theme_cards.append(card)
+
+        self.cards_layout.addStretch(1)  # Чтобы карточки были прижаты к верху
+        scroll.setWidget(scroll_content)
+        self.right_layout.addWidget(scroll)
+
+        # --- СБОРКА ГЛАВНОГО СЛОЯ ---
+
+        main_layout.addWidget(left_panel_widget)
+
+        main_layout.addStretch(1)
+
+        main_layout.addWidget(self.game_area, alignment=Qt.AlignmentFlag.AlignCenter)
+
+        main_layout.addStretch(1)
+
+        main_layout.addWidget(right_panel_widget)
+
+    def on_theme_selected(self, index):
+        self.game_area.set_theme(index)
+        for i, card in enumerate(self.theme_cards):
+            card.set_selected(i == index)
+        self.update()
 
     def update_labels(self, score, high_score):
         self.label_best_val.setText(str(high_score))

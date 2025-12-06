@@ -1,4 +1,3 @@
-import json
 import math
 import sys
 
@@ -9,7 +8,6 @@ from PyQt6.QtWidgets import QPushButton, QWidget
 from bird import Bird
 from json_reader import load_style_from_json, load_themes_from_json
 from pipe import Pipe
-from theme import Theme
 
 SCREEN_WIDTH = 400
 SCREEN_HEIGHT = 600
@@ -30,7 +28,7 @@ class GameArea(QWidget):
 
         self.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
         self.themes = load_themes_from_json("themes.json")
-        self.current_theme_index = 2
+        self.current_theme_index = 0
         if self.themes:
             self.current_theme = self.themes[self.current_theme_index]
         else:
@@ -65,6 +63,16 @@ class GameArea(QWidget):
         self.spawn_timer.stop()
         self.game_active = False
         self.reset_game()
+
+    def set_theme(self, index):
+        if 0 <= index < len(self.themes):
+            self.current_theme_index = index
+            self.current_theme = self.themes[index]
+            self.update()  # Перерисовать игру
+
+            # Обновить главное окно (фон)
+            if self.window():
+                self.window().update()
 
     def reset_game(self):
         self.game_active = False
@@ -195,37 +203,6 @@ class GameArea(QWidget):
                     return True
 
         return False
-
-    # def load_themes_from_json(self, file_path):
-    #     themes_list = []
-    #     try:
-    #         with open(file_path, "r", encoding="utf-8") as f:
-    #             data = json.load(f)
-
-    #         for item in data:
-    #             # Создаем объект Theme, используя данные из словаря
-    #             new_theme = Theme(
-    #                 name=item["name"],
-    #                 bg_path=item["bg_path"],
-    #                 bird_path=item["bird_path"],
-    #                 pipe_path=item["pipe_path"],
-    #                 text_color_hex=item["text_color_hex"],
-    #             )
-    #             themes_list.append(new_theme)
-
-    #     except Exception as e:
-    #         print(f"Ошибка загрузки тем: {e}")
-
-    #         default_theme = Theme(
-    #             "Backup",
-    #             "assets/images/background.png",
-    #             "assets/images/bird.png",
-    #             "assets/images/pipe.png",
-    #             "#FFFFFF",
-    #         )
-    #         themes_list.append(default_theme)
-
-    #     return themes_list
 
     def switch_theme(self):
         self.current_theme_index = (self.current_theme_index + 1) % len(self.themes)
