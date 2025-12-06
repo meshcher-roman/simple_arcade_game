@@ -7,7 +7,7 @@
   },
   "audio": {
     "music_volume": 0.3,
-    "sfx_volume": 1.0
+    "sfx_volume": 0.3
   },
   "gameplay": {
     "fps": 60,

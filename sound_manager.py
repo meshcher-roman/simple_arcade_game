@@ -45,8 +45,6 @@ class SoundManager:
 
     def play_jump(self):
         if self.jump_sfx:
-            if self.jump_sfx.isPlaying():
-                self.jump_sfx.stop()
             self.jump_sfx.play()
 
     def play_score(self):
