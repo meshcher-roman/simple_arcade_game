@@ -52,3 +52,29 @@ def load_themes_from_json(file_path):
         themes_list.append(default_theme)
 
     return themes_list
+
+
+def load_settings_from_json(file_path):
+    try:
+        with open(file_path, "r", encoding="utf-8") as f:
+            return json.load(f)
+    except Exception as e:
+        print(f"Ошибка загрузки настроек: {e}")
+        return {
+            "window": {
+                "screen_width": 400,
+                "screen_height": 600,
+                "app_min_width": 1000,
+                "app_min_height": 600,
+            },
+            "gameplay": {"fps": 60, "spawn_interval": 1500},
+            "bird": {
+                "start_x": 50,
+                "start_y": 200,
+                "size": 30,
+                "gravity": 0.5,
+                "jump_velocity": -7,
+                "rotation_multiplier": 3,
+            },
+            "pipe": {"width": 60, "speed": 3, "gap_size": 150},
+        }

@@ -6,11 +6,12 @@ from PyQt6.QtGui import QColor, QFont, QPainter
 from PyQt6.QtWidgets import QPushButton, QWidget
 
 from bird import Bird
-from json_reader import load_style_from_json, load_themes_from_json
+from json_reader import (
+    load_settings_from_json,
+    load_style_from_json,
+    load_themes_from_json,
+)
 from pipe import Pipe
-
-SCREEN_WIDTH = 400
-SCREEN_HEIGHT = 600
 
 
 class GameArea(QWidget):
@@ -18,13 +19,22 @@ class GameArea(QWidget):
 
     def __init__(self):
         super().__init__()
+
+        # 1. ЗАГРУЖАЕМ НАСТРОЙКИ
+        self.config = load_settings_from_json("settings.json")
+
+        # Достаем параметры окна для удобства
+        self.SCREEN_WIDTH = self.config["window"]["screen_width"]
+        self.SCREEN_HEIGHT = self.config["window"]["screen_height"]
+
         self.hover_frame = 0
         self.ready_to_start = False
         self.settings = QSettings("MyApp", "FlappyBird")
         self.high_score = int(self.settings.value("high_score", 0))
         self.score = 0
 
-        self.setFixedSize(SCREEN_WIDTH, SCREEN_HEIGHT)
+        # Используем загруженные размеры
+        self.setFixedSize(self.SCREEN_WIDTH, self.SCREEN_HEIGHT)
 
         self.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
         self.themes = load_themes_from_json("themes.json")
@@ -32,28 +42,38 @@ class GameArea(QWidget):
         if self.themes:
             self.current_theme = self.themes[self.current_theme_index]
         else:
-            # На всякий случай, если JSON пустой или битый
             print("Критическая ошибка: Темы не загружены!")
             sys.exit()
 
         self.timer = QTimer()
         self.timer.timeout.connect(self.update_game)
-        self.timer.start(16)
-        # Создаем птицу
-        self.bird = Bird(50, 200)
+        # FPS можно тоже брать из конфига (1000 / 60 = 16ms)
+        self.timer.start(1000 // self.config["gameplay"]["fps"])
+
+        # Создаем птицу с параметрами из конфига
+        b_conf = self.config["bird"]
+        self.bird = Bird(
+            x=b_conf["start_x"],
+            y=b_conf["start_y"],
+            size=b_conf["size"],
+            gravity=b_conf["gravity"],
+            jump_velocity=b_conf["jump_velocity"],
+            rotation_multiplier=b_conf["rotation_multiplier"],
+        )
 
         self.game_active = True
         self.is_game_over = False
 
-        # Логика добавления труб
         self.pipes = []
         self.spawn_timer = QTimer()
         self.spawn_timer.timeout.connect(self.spawn_pipe)
-        self.spawn_timer.start(1500)
+        # Интервал спавна из конфига
+        self.spawn_timer.start(self.config["gameplay"]["spawn_interval"])
 
         self.restart_btn = QPushButton("Start Game", self)
         self.restart_btn.resize(200, 50)
-        self.restart_btn.move(100, 350)
+        # Центрируем кнопку (примерно)
+        self.restart_btn.move(self.SCREEN_WIDTH // 2 - 100, 350)
 
         button_style = load_style_from_json("style.json")
         self.restart_btn.setStyleSheet(button_style)
@@ -80,20 +100,22 @@ class GameArea(QWidget):
         self.is_game_over = False
 
         self.pipes.clear()
-        self.bird.y = 200
+        # Сброс позиции из конфига
+        self.bird.y = self.config["bird"]["start_y"]
         self.bird.velocity = 0
         self.score = 0
         self.score_updated.emit(self.score, self.high_score)
         self.restart_btn.hide()
         self.setFocus()
-        self.timer.start(16)
+        self.timer.start(1000 // self.config["gameplay"]["fps"])
         self.spawn_timer.stop()
 
     def restart_game(self):
         self.reset_game()
 
     def spawn_pipe(self):
-        new_pipe = Pipe(SCREEN_WIDTH, SCREEN_HEIGHT)
+        # Передаем настройки труб в новую трубу
+        new_pipe = Pipe(self.SCREEN_WIDTH, self.SCREEN_HEIGHT, self.config["pipe"])
         self.pipes.append(new_pipe)
 
     def keyPressEvent(self, event):
@@ -101,18 +123,22 @@ class GameArea(QWidget):
             if self.ready_to_start:
                 self.ready_to_start = False
                 self.game_active = True
-                self.spawn_timer.start(1500)
+                self.spawn_timer.start(self.config["gameplay"]["spawn_interval"])
                 self.bird.jump()
 
             elif self.game_active:
                 self.bird.jump()
 
+    # ... update_game почти без изменений, только замени 200 на self.config["bird"]["start_y"] ...
     def update_game(self):
         if self.ready_to_start:
             self.hover_frame += 0.1
-            self.bird.y = 200 + math.sin(self.hover_frame) * 10
+            self.bird.y = (
+                self.config["bird"]["start_y"] + math.sin(self.hover_frame) * 10
+            )
             self.update()
             return
+
         self.bird.move()
 
         if self.game_active:
@@ -183,8 +209,9 @@ class GameArea(QWidget):
 
     def check_collisions(self):
         bird_rect = self.bird.get_rect()
+        # Используем динамическую высоту экрана
+        floor_limit = self.SCREEN_HEIGHT - self.bird.size
 
-        floor_limit = SCREEN_HEIGHT - self.bird.size
         if self.bird.y >= floor_limit:
             self.bird.y = floor_limit
             self.timer.stop()
@@ -198,10 +225,8 @@ class GameArea(QWidget):
         if self.game_active:
             for pipe in self.pipes:
                 top_rect, bottom_rect = pipe.get_rects()
-
                 if bird_rect.intersects(top_rect) or bird_rect.intersects(bottom_rect):
                     return True
-
         return False
 
     def switch_theme(self):

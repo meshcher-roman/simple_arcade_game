@@ -8,15 +8,13 @@ from PyQt6.QtWidgets import (
     QHBoxLayout,
     QLabel,
     QMainWindow,
-    QPushButton,
     QScrollArea,
-    QSizePolicy,
     QVBoxLayout,
     QWidget,
 )
 
 from game_area import GameArea
-from json_reader import load_style_from_json
+from json_reader import load_settings_from_json
 from theme_card import ThemeCard
 
 
@@ -25,6 +23,13 @@ class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("Flappy Bird")
+
+        # Загружаем настройки окна
+        config = load_settings_from_json("settings.json")
+        min_w = config["window"]["app_min_width"]
+        min_h = config["window"]["app_min_height"]
+
+        self.setMinimumSize(min_w, min_h)
 
         self.setMinimumSize(1000, 600)
 
@@ -115,7 +120,7 @@ class MainWindow(QMainWindow):
             self.cards_layout.addWidget(card)
             self.theme_cards.append(card)
 
-        self.cards_layout.addStretch(1)  # Чтобы карточки были прижаты к верху
+        self.cards_layout.addStretch(1)
         scroll.setWidget(scroll_content)
         self.right_layout.addWidget(scroll)
 

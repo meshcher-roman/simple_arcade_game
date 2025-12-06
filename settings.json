@@ -1,0 +1,25 @@
+{
+  "window": {
+    "screen_width": 400,
+    "screen_height": 600,
+    "app_min_width": 1000,
+    "app_min_height": 600
+  },
+  "gameplay": {
+    "fps": 60,
+    "spawn_interval": 1500
+  },
+  "bird": {
+    "start_x": 50,
+    "start_y": 200,
+    "size": 30,
+    "gravity": 0.5,
+    "jump_velocity": -7.0,
+    "rotation_multiplier": 3.0
+  },
+  "pipe": {
+    "width": 60,
+    "speed": 3,
+    "gap_size": 150
+  }
+}

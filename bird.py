@@ -3,49 +3,48 @@ from PyQt6.QtGui import QColor
 
 
 class Bird:
-    def __init__(self, x, y, size=30, color="#FFD700"):
+    def __init__(
+        self, x, y, size, gravity, jump_velocity, rotation_multiplier, color="#FFD700"
+    ):
         self.x = x
         self.y = y
         self.size = size
         self.color = QColor(color)
 
         self.velocity = 0
-        self.gravity = 0.5
+        self.gravity = gravity
+        self.jump_velocity_val = jump_velocity
+        self.rotation_multiplier = rotation_multiplier
 
     def move(self):
         self.velocity += self.gravity
         self.y += self.velocity
 
         if self.y < 0:
-            self.y = 0  # Не пускаем выше края
-            self.velocity = (
-                0  # Гасим инерцию подлета, чтобы она сразу могла начать падать
-            )
+            self.y = 0
+            self.velocity = 0
+
+    def jump(self):
+        self.velocity = self.jump_velocity_val
 
     def draw(self, painter, bird_pixmap):
         painter.save()
         center_x = self.x + self.size / 2
         center_y = self.y + self.size / 2
 
-        rotation_angle = self.velocity * 3
+        rotation_angle = self.velocity * self.rotation_multiplier
 
         if rotation_angle < -30:
             rotation_angle = -30
-        if rotation_angle > 30:
-            rotation_angle = 30
+        if rotation_angle > 90:
+            rotation_angle = 90
 
         painter.translate(center_x, center_y)
-
         painter.rotate(rotation_angle)
 
         offset = -self.size / 2
-
         painter.drawPixmap(int(offset), int(offset), self.size, self.size, bird_pixmap)
-
         painter.restore()
-
-    def jump(self):
-        self.velocity = -7
 
     def get_rect(self):
         return QRectF(self.x, self.y, self.size * 0.8, self.size * 0.7)
