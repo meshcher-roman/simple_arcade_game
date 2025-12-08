@@ -33,13 +33,9 @@ class MainWindow(QMainWindow):
         # 1. ЗАГРУЗКА НАСТРОЕК
         config = load_settings_from_json("settings.json")
 
-        # 2. ИСПРАВЛЕНИЕ РАЗМЕРА ОКНА (Чтобы панели не липли к игре)
-        # 250(слева) + 400(игра) + 250(справа) = 900 пикселей контента.
-        # Ставим 1100, чтобы всегда было 200 пикселей "воздуха".
         safe_min_width = 1100
 
         json_min_w = config["window"].get("app_min_width", 1000)
-        # Берем максимум, чтобы даже json не мог сломать верстку
         min_w = max(safe_min_width, json_min_w)
         min_h = config["window"].get("app_min_height", 700)
 
@@ -171,7 +167,6 @@ class MainWindow(QMainWindow):
         main_layout.addStretch(1)
 
         # 3. ИГРА (По центру)
-        # Qt.AlignmentFlag.AlignCenter держит игру в центре по вертикали и горизонтали
         main_layout.addWidget(self.game_area)
         # 4. Пружина справа (Толкает игру к центру)
         main_layout.addStretch(1)

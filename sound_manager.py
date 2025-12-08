@@ -89,7 +89,7 @@ class SoundManager(QObject):
         if self.hit_sfx:
             self.hit_sfx.setVolume(target_vol)
 
-    # --- МЕТОДЫ ВОСПРОИЗВЕДЕНИЯ (без изменений) ---
+    # --- МЕТОДЫ ВОСПРОИЗВЕДЕНИЯ ---
 
     def play_jump(self):
         if self.jump_sfx:
