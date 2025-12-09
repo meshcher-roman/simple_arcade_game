@@ -1,31 +1,31 @@
 {
-    "window": {
-        "screen_width": 400,
-        "screen_height": 600,
-        "app_min_width": 1100,
-        "app_min_height": 700
-    },
-    "audio": {
-        "music_volume": 0.35,
-        "sfx_volume": 0.12,
-        "sfx_muted": false,
-        "music_muted": false
-    },
-    "gameplay": {
-        "fps": 60,
-        "spawn_interval": 1500
-    },
-    "bird": {
-        "start_x": 50,
-        "start_y": 200,
-        "size": 30,
-        "gravity": 0.5,
-        "jump_velocity": -7.0,
-        "rotation_multiplier": 3.0
-    },
-    "pipe": {
-        "width": 60,
-        "speed": 3,
-        "gap_size": 150
-    }
+  "window": {
+    "screen_width": 400,
+    "screen_height": 600,
+    "app_min_width": 1100,
+    "app_min_height": 700
+  },
+  "audio": {
+    "music_volume": 0.35,
+    "sfx_volume": 0.12,
+    "sfx_muted": false,
+    "music_muted": false
+  },
+  "gameplay": {
+    "fps": 60,
+    "spawn_interval": 1500
+  },
+  "bird": {
+    "start_x": 50,
+    "start_y": 200,
+    "size": 30,
+    "gravity": 0.5,
+    "jump_velocity": -7.0,
+    "rotation_multiplier": 3.0
+  },
+  "pipe": {
+    "width": 60,
+    "speed": 10,
+    "gap_size": 150
+  }
 }
